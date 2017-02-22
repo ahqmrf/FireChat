@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "758495050268",
+    "firebase_url": "https://chat-application-804ef.firebaseio.com",
+    "project_id": "chat-application-804ef",
+    "storage_bucket": "chat-application-804ef.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:758495050268:android:16ccd3c777333809",
+        "android_client_info": {
+          "package_name": "com.lenovo.ahqmrf.firechat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "758495050268-q3gts9ss6c45dm1jqtag2gjirgple0f4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.lenovo.ahqmrf.firechat",
+            "certificate_hash": "b874578c6a8ef84e72d037efb819ad91b9843702"
+          }
+        },
+        {
+          "client_id": "758495050268-rh5ao2s9sp6q43upicdutr5lk4faco7i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCinbo9T9V88K-UcFigtS0JGOnG3E0SVGE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "758495050268-rh5ao2s9sp6q43upicdutr5lk4faco7i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
