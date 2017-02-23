@@ -7,10 +7,11 @@ import java.util.Date;
  */
 
 public class Message {
-    private String user;
+    private String sentTo;
     private String text;
     private long time;
     private String id;
+
 
     public String getId() {
         return id;
@@ -24,18 +25,19 @@ public class Message {
         this.time = new Date().getTime();
     }
 
-    public Message(String id, String text) {
+    public Message(String id, String text, String sentTo) {
         this.id = id;
         this.text = text;
+        this.sentTo = sentTo;
         this.time = new Date().getTime();
     }
 
-    public String getUser() {
-        return user;
+    public String getSentTo() {
+        return sentTo;
     }
 
-    public void setUser(String user) {
-        this.user = user;
+    public void setSentTo(String sentTo) {
+        this.sentTo = sentTo;
     }
 
     public String getText() {

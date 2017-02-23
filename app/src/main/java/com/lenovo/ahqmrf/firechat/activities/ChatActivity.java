@@ -1,5 +1,6 @@
 package com.lenovo.ahqmrf.firechat.activities;
 
+import android.content.Intent;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -9,11 +10,13 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.google.firebase.auth.FirebaseAuth;
 import com.lenovo.ahqmrf.firechat.R;
 import com.lenovo.ahqmrf.firechat.adapter.MessageAdapter;
 import com.lenovo.ahqmrf.firechat.model.Message;
@@ -29,22 +32,32 @@ public class ChatActivity extends AppCompatActivity {
     private String mId;
     private ArrayList<Message> msgList;
     private Firebase mFirebaseRef;
+    private FirebaseAuth mFirebaseAuth;
+    private String sentTo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
+        Firebase.setAndroidContext(this);
+
+        mFirebaseAuth = FirebaseAuth.getInstance();
+        if(mFirebaseAuth.getCurrentUser() != null) mId = mFirebaseAuth.getCurrentUser().getEmail();
+        else {
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+        }
+
+        sentTo = getIntent().getStringExtra("sent_to");
+        setTitle(sentTo);
         mChatList = (RecyclerView) findViewById(R.id.rv_msg_list);
         btnSend = (Button) findViewById(R.id.btn_send);
         msgText = (EditText) findViewById(R.id.et_msg);
         msgList = new ArrayList<>();
-        mId = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
         mChatList.setLayoutManager(new LinearLayoutManager(this));
         mAdapter = new MessageAdapter(this, mId, msgList);
         mChatList.setAdapter(mAdapter);
-
-        Firebase.setAndroidContext(this);
         mFirebaseRef = new Firebase("https://chat-application-804ef.firebaseio.com/").child("chat");
 
         btnSend.setOnClickListener(new View.OnClickListener() {
@@ -56,7 +69,7 @@ public class ChatActivity extends AppCompatActivity {
                     /**
                      * Firebase - Send message
                      */
-                    mFirebaseRef.push().setValue(new Message(mId, message));
+                    mFirebaseRef.push().setValue(new Message(mId, message, sentTo));
                 }
 
                 msgText.setText("");
@@ -68,14 +81,19 @@ public class ChatActivity extends AppCompatActivity {
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 if (dataSnapshot != null && dataSnapshot.getValue() != null) {
                     try{
-
                         Message model = dataSnapshot.getValue(Message.class);
-
-                        msgList.add(model);
-                        mChatList.scrollToPosition(msgList.size() - 1);
-                        mAdapter.notifyItemInserted(msgList.size() - 1);
+                        if(model.getSentTo().equals(sentTo) && model.getId().equals(mId)) {
+                            msgList.add(model);
+                            mChatList.scrollToPosition(msgList.size() - 1);
+                            mAdapter.notifyItemInserted(msgList.size() - 1);
+                        }
+                        else if(model.getSentTo().equals(mId) && model.getId().equals(sentTo)) {
+                            msgList.add(model);
+                            mChatList.scrollToPosition(msgList.size() - 1);
+                            mAdapter.notifyItemInserted(msgList.size() - 1);
+                        }
                     } catch (Exception ex) {
-                        Log.e("Chat activity", ex.getMessage());
+                        //Log.e("Chat activity", ex.getMessage());
                     }
                 }
             }

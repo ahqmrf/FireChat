@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_chat_list"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    tools:context="com.lenovo.ahqmrf.firechat.activities.ChatListActivity">
+
+    <EditText
+        android:id="@+id/et_user_email"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:gravity="center"
+        android:hint="Enter email address"
+        android:background="@android:color/transparent"/>
+
+    <Button
+        android:id="@+id/btn_start_chatting"
+        android:layout_margin="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Start Chatting"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:background="@color/blue"/>
+    
+</LinearLayout>
