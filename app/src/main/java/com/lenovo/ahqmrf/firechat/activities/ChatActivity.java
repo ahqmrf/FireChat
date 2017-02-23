@@ -9,7 +9,11 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -23,6 +27,7 @@ import com.lenovo.ahqmrf.firechat.R;
 import com.lenovo.ahqmrf.firechat.adapter.MessageAdapter;
 import com.lenovo.ahqmrf.firechat.model.Message;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 public class ChatActivity extends AppCompatActivity {
@@ -42,6 +47,10 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
+        if(getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+
         Firebase.setAndroidContext(this);
 
         mFirebaseAuth = FirebaseAuth.getInstance();
@@ -60,6 +69,9 @@ public class ChatActivity extends AppCompatActivity {
         mChatList.setLayoutManager(new LinearLayoutManager(this));
         mAdapter = new MessageAdapter(this, mId, msgList);
         mChatList.setAdapter(mAdapter);
+
+        getOverflowMenu();
+
         mFirebaseRef = new Firebase("https://chat-application-804ef.firebaseio.com/").child("chat");
 
         btnSend.setOnClickListener(new View.OnClickListener() {
@@ -139,4 +151,47 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
+    private void getOverflowMenu() {
+        try {
+            ViewConfiguration config = ViewConfiguration.get(this);
+            Field menuKeyField = ViewConfiguration.class.getDeclaredField("sHasPermanentMenuKey");
+            if (menuKeyField != null) {
+                menuKeyField.setAccessible(true);
+                menuKeyField.setBoolean(config, false);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            case R.id.menu_logout:
+                logout();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void logout() {
+        FirebaseAuth.getInstance().signOut();
+        startActivity(new Intent(this, LoginActivity.class));
+        finish();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.overflow_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
 }

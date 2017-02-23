@@ -26,6 +26,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private ProgressDialog dialog;
     private FirebaseAuth boss;
     private View layout;
+    private boolean backPressed;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +46,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         dialog = new ProgressDialog(this);
         boss = FirebaseAuth.getInstance();
+
+        backPressed = false;
 
     }
 
@@ -79,6 +82,18 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
         else if(v.getId() == R.id.btn_login) {
             userLogin();
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(backPressed) {
+            backPressed = false;
+            System.exit(0);
+        }
+        else {
+            Toast.makeText(this, "Press back again to exit", Toast.LENGTH_SHORT).show();
+            backPressed = true;
         }
     }
 }
