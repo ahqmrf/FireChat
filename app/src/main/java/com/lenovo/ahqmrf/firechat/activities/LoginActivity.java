@@ -89,7 +89,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     public void onBackPressed() {
         if(backPressed) {
             backPressed = false;
-            System.exit(0);
+            finishAffinity();
         }
         else {
             Toast.makeText(this, "Press back again to exit", Toast.LENGTH_SHORT).show();

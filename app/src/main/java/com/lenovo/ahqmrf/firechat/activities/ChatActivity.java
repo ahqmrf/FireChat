@@ -1,14 +1,12 @@
 package com.lenovo.ahqmrf.firechat.activities;
 
 import android.content.Intent;
-import android.provider.Settings;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -16,7 +14,6 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
@@ -47,20 +44,22 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        if(getSupportActionBar() != null) {
+        if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
         Firebase.setAndroidContext(this);
 
         mFirebaseAuth = FirebaseAuth.getInstance();
-        if(mFirebaseAuth.getCurrentUser() != null) mId = mFirebaseAuth.getCurrentUser().getEmail();
+        if (mFirebaseAuth.getCurrentUser() != null) mId = mFirebaseAuth.getCurrentUser().getEmail();
         else {
             startActivity(new Intent(this, LoginActivity.class));
             finish();
         }
 
         sentTo = getIntent().getStringExtra("sent_to");
+
+
         setTitle(sentTo);
         mChatList = (RecyclerView) findViewById(R.id.rv_msg_list);
         btnSend = (Button) findViewById(R.id.btn_send);
@@ -73,6 +72,7 @@ public class ChatActivity extends AppCompatActivity {
         getOverflowMenu();
 
         mFirebaseRef = new Firebase("https://chat-application-804ef.firebaseio.com/").child("chat");
+
 
         btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -94,14 +94,13 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 if (dataSnapshot != null && dataSnapshot.getValue() != null) {
-                    try{
+                    try {
                         Message model = dataSnapshot.getValue(Message.class);
-                        if(model.getSentTo().equals(sentTo) && model.getId().equals(mId)) {
+                        if (model.getSentTo().equals(sentTo) && model.getId().equals(mId)) {
                             msgList.add(model);
                             mChatList.scrollToPosition(msgList.size() - 1);
                             mAdapter.notifyItemInserted(msgList.size() - 1);
-                        }
-                        else if(model.getSentTo().equals(mId) && model.getId().equals(sentTo)) {
+                        } else if (model.getSentTo().equals(mId) && model.getId().equals(sentTo)) {
                             msgList.add(model);
                             mChatList.scrollToPosition(msgList.size() - 1);
                             mAdapter.notifyItemInserted(msgList.size() - 1);
@@ -179,7 +178,9 @@ public class ChatActivity extends AppCompatActivity {
 
     private void logout() {
         FirebaseAuth.getInstance().signOut();
-        startActivity(new Intent(this, LoginActivity.class));
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
         finish();
     }
 

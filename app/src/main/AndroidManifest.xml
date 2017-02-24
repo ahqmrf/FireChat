@@ -11,19 +11,21 @@
         <activity
             android:name=".activities.LoginActivity"
             android:label="FireChat">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
         <activity
             android:name=".activities.ChatActivity"
-            android:label="Conversation"></activity>
+            android:label="Conversation" />
         <activity
             android:name=".activities.RegisterActivity"
             android:label="Register" />
-        <activity android:name=".activities.ChatListActivity"></activity>
+        <activity android:name=".activities.ChatListActivity" />
     </application>
 
 </manifest>

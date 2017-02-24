@@ -12,6 +12,7 @@
         android:id="@+id/et_user_email"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:inputType="textEmailAddress"
         android:padding="5dp"
         android:gravity="center"
         android:hint="Enter email address"
