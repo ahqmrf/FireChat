@@ -11,7 +11,33 @@ public class Message {
     private String text;
     private long time;
     private String id;
+    private String readByUser;
+    private String readBySentTo;
+    private int serialId;
 
+    public int getSerialId() {
+        return serialId;
+    }
+
+    public void setSerialId(int serialId) {
+        this.serialId = serialId;
+    }
+
+    public String getReadByUser() {
+        return readByUser;
+    }
+
+    public void setReadByUser(String readByUser) {
+        this.readByUser = readByUser;
+    }
+
+    public String getReadBySentTo() {
+        return readBySentTo;
+    }
+
+    public void setReadBySentTo(String readBySentTo) {
+        this.readBySentTo = readBySentTo;
+    }
 
     public String getId() {
         return id;
@@ -25,11 +51,13 @@ public class Message {
         this.time = new Date().getTime();
     }
 
-    public Message(String id, String text, String sentTo) {
+    public Message(String id, String text, String sentTo, String readByUser, String readBySentTo, int serialId) {
         this.id = id;
         this.text = text;
         this.sentTo = sentTo;
-        this.time = new Date().getTime();
+        this.readByUser = readByUser;
+        this.readBySentTo = readBySentTo;
+        this.serialId = serialId;
     }
 
     public String getSentTo() {

@@ -2,6 +2,7 @@ package com.lenovo.ahqmrf.firechat.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -14,6 +15,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
@@ -27,7 +29,7 @@ import com.lenovo.ahqmrf.firechat.model.Message;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
-public class ChatActivity extends AppCompatActivity {
+public class ChatActivity extends AppCompatActivity implements ChildEventListener {
 
     private RecyclerView mChatList;
     private MessageAdapter mAdapter;
@@ -38,6 +40,8 @@ public class ChatActivity extends AppCompatActivity {
     private Firebase mFirebaseRef;
     private FirebaseAuth mFirebaseAuth;
     private String sentTo;
+    private TextView notification;
+    private int counter = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,12 +53,14 @@ public class ChatActivity extends AppCompatActivity {
         }
 
         Firebase.setAndroidContext(this);
+        Firebase.goOnline();
+        counter = -1;
 
         mFirebaseAuth = FirebaseAuth.getInstance();
         if (mFirebaseAuth.getCurrentUser() != null) mId = mFirebaseAuth.getCurrentUser().getEmail();
         else {
-            startActivity(new Intent(this, LoginActivity.class));
             finish();
+            startActivity(new Intent(this, LoginActivity.class));
         }
 
         sentTo = getIntent().getStringExtra("sent_to");
@@ -69,9 +75,11 @@ public class ChatActivity extends AppCompatActivity {
         mAdapter = new MessageAdapter(this, mId, msgList);
         mChatList.setAdapter(mAdapter);
 
+        notification = (TextView) findViewById(R.id.tv_notification);
+
         getOverflowMenu();
 
-        mFirebaseRef = new Firebase("https://chat-application-804ef.firebaseio.com/").child("chat");
+        mFirebaseRef = new Firebase("https://chat-application-804ef.firebaseio.com/").child("messages");
 
 
         btnSend.setOnClickListener(new View.OnClickListener() {
@@ -83,54 +91,14 @@ public class ChatActivity extends AppCompatActivity {
                     /**
                      * Firebase - Send message
                      */
-                    mFirebaseRef.push().setValue(new Message(mId, message, sentTo));
+                    mFirebaseRef.push().setValue(new Message(mId, message, sentTo, "1", "0", -1));
                 }
 
                 msgText.setText("");
             }
         });
 
-        mFirebaseRef.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                if (dataSnapshot != null && dataSnapshot.getValue() != null) {
-                    try {
-                        Message model = dataSnapshot.getValue(Message.class);
-                        if (model.getSentTo().equals(sentTo) && model.getId().equals(mId)) {
-                            msgList.add(model);
-                            mChatList.scrollToPosition(msgList.size() - 1);
-                            mAdapter.notifyItemInserted(msgList.size() - 1);
-                        } else if (model.getSentTo().equals(mId) && model.getId().equals(sentTo)) {
-                            msgList.add(model);
-                            mChatList.scrollToPosition(msgList.size() - 1);
-                            mAdapter.notifyItemInserted(msgList.size() - 1);
-                        }
-                    } catch (Exception ex) {
-                        //Log.e("Chat activity", ex.getMessage());
-                    }
-                }
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-
-            }
-        });
+        mFirebaseRef.addChildEventListener(this);
 
         msgText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -168,6 +136,9 @@ public class ChatActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case android.R.id.home:
                 onBackPressed();
+                Firebase.goOffline();
+                mFirebaseRef.removeEventListener(this);
+                finish();
                 return true;
             case R.id.menu_logout:
                 logout();
@@ -180,8 +151,10 @@ public class ChatActivity extends AppCompatActivity {
         FirebaseAuth.getInstance().signOut();
         Intent intent = new Intent(this, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
+        mFirebaseRef.removeEventListener(this);
+        Firebase.goOffline();
         finish();
+        startActivity(intent);
     }
 
     @Override
@@ -194,5 +167,74 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+    }
+
+    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+        if (dataSnapshot != null && dataSnapshot.getValue() != null) {
+            try {
+                Message model = dataSnapshot.getValue(Message.class);
+                if (model.getSentTo().equals(sentTo) && model.getId().equals(mId)) {
+                    if (model.getSerialId() == -1) {
+                        model.setSerialId(msgList.size());
+                        dataSnapshot.getRef().setValue(model);
+                    }
+                    msgList.add(model);
+                    mChatList.scrollToPosition(msgList.size() - 1);
+                    mAdapter.notifyItemInserted(msgList.size() - 1);
+                } else if (model.getSentTo().equals(mId) && model.getId().equals(sentTo)) {
+                    if (model.getSerialId() == -1) {
+                        model.setSerialId(msgList.size());
+                    }
+                    model.setReadBySentTo("1");
+                    dataSnapshot.getRef().setValue(model);
+                    msgList.add(model);
+                    mChatList.scrollToPosition(msgList.size() - 1);
+                    mAdapter.notifyItemInserted(msgList.size() - 1);
+                } else if (model.getSentTo().equals(mId) && model.getReadBySentTo().equals("0")) {
+                    String str[] = notification.getText().toString().split(" ");
+                    int count = Integer.parseInt(str[0]);
+                    count++;
+                    if (count > 0) {
+                        String updateNotific = "" + count + " new messages";
+                        notification.setText(updateNotific);
+                        notification.setVisibility(View.VISIBLE);
+                    } else {
+                        notification.setVisibility(View.GONE);
+                    }
+                }
+            } catch (Exception ex) {
+                //Log.e("Chat activity", ex.getMessage());
+            }
+        }
+    }
+
+    @Override
+    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+        if (dataSnapshot != null && dataSnapshot.getValue() != null) {
+            try {
+                Message model = dataSnapshot.getValue(Message.class);
+                if (model.getSentTo().equals(sentTo) && model.getId().equals(mId) && model.getReadBySentTo().equals("1")) {
+                    msgList.set(model.getSerialId(), model);
+                    mAdapter.notifyItemChanged(model.getSerialId());
+                }
+            } catch (Exception ex) {
+                //Log.e("Chat activity", ex.getMessage());
+            }
+        }
+    }
+
+    @Override
+    public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+    }
+
+    @Override
+    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+    }
+
+    @Override
+    public void onCancelled(FirebaseError firebaseError) {
+
     }
 }

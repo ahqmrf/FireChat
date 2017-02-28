@@ -21,7 +21,8 @@
         </activity>
         <activity
             android:name=".activities.ChatActivity"
-            android:label="Conversation" />
+            android:label="Conversation"
+            android:noHistory="true"/>
         <activity
             android:name=".activities.RegisterActivity"
             android:label="Register" />

@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.lenovo.ahqmrf.firechat.R;
@@ -48,6 +49,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     public void onBindViewHolder(ViewHolder holder, int position) {
         Message message = itemList.get(position);
         holder.msg.setText(message.getText());
+        if(message.getReadBySentTo().equals("1") && holder.getItemViewType() == RIGHT) {
+            holder.seen.setBackgroundResource(R.drawable.ic_seen);
+        }
+        else if(message.getReadBySentTo().equals("0") && holder.getItemViewType() == RIGHT) {
+            holder.seen.setBackgroundResource(R.drawable.ic_unseen);
+        }
     }
 
 
@@ -66,10 +73,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         public TextView msg;
+        public ImageView seen;
 
         public ViewHolder(View itemView) {
             super(itemView);
             msg = (TextView) itemView.findViewById(R.id.tv_msg);
+            seen = (ImageView) itemView.findViewById(R.id.iv_seen);
         }
     }
 }
